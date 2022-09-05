@@ -3,22 +3,6 @@ const inquirer = require('inquirer');
 const connection = require('./db/connection');
 
 
-
-// let myTeam = [];
-
-// // Questions for User Input
-// function getTeamMemberInfo(memberRole) {
-//     // collect additional info not inherited from Employee class
-//     extraInfo = '';
-//     if(memberRole === 'Engineer') {
-//         extraInfo = 'Github Username';   
-//     } else if (memberRole === 'Intern') {
-//         extraInfo = 'School Name'; 
-//     } else {
-//         extraInfo = 'Office Number'; 
-//     }
-
-
 //present user with prompt to select choices
 const dbOptions = async() => {
     try {
@@ -48,6 +32,14 @@ const dbOptions = async() => {
 
             case 'View Employees':
                 displayEmp();
+                break;
+
+            case 'Add Department':
+                addDept();
+                break;
+
+            case 'Add Role':
+                addRole();
                 break;
         }
     } catch (err) {
@@ -106,6 +98,56 @@ const displayEmp = async() => {
         console.log(err);
     };
 }
+
+
+// function to add new department to the DB 
+const addDept = async() => {
+    try {
+        // promt user for new department name
+        let newDept = await inquirer.prompt([
+            {
+                message: 'Enter New Department Name :',
+                name: 'dept_name',
+                type: 'input'
+            }
+        ]);
+        // save deparment name in the db
+        connection.query('INSERT INTO department SET ?', {
+            name: newDept.dept_name
+        });
+        console.table(`success, the ${newDept.dept_name} department has been added`);
+
+        dbOptions();       
+    } catch (err) {
+        console.log(err);
+    };
+}
+
+
+// function to add new department to the DB 
+const addRole = async() => {
+    try {
+        // promt user for new role info
+        let newDept = await inquirer.prompt([
+            {
+                message: 'Enter New Role Name :',
+                name: 'dept_name',
+                type: 'input'
+            }
+        ]);
+        // save deparment name in the db
+        connection.query('INSERT INTO department SET ?', {
+            name: newDept.dept_name
+        });
+        console.table(`success, the ${newDept.dept_name} department has been added`);
+
+        dbOptions();       
+    } catch (err) {
+        console.log(err);
+    };
+}
+
+
 
 
 dbOptions();
