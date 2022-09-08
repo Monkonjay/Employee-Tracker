@@ -1,4 +1,5 @@
 // require packages and dependencies
+const { response } = require('express');
 const inquirer = require('inquirer');
 const connection = require('./db/connection');
 
@@ -9,7 +10,7 @@ const dbOptions = async() => {
         let response = await inquirer.prompt({
             message: 'Where would you like to start? :',
             name: "starting_option",
-            type: 'list',
+            type: 'rawlist',
             choices: [
                 'View Departments', 
                 'View Roles', 
@@ -56,7 +57,7 @@ const displayDept = async() => {
             if (err) throw err;
             // use console.table to display table
             console.table(res);
-
+            
             dbOptions();
         });
     } catch (err) {
@@ -115,7 +116,7 @@ const addDept = async() => {
         connection.query('INSERT INTO department SET ?', {
             name: newDept.dept_name
         });
-        console.table(`success, the ${newDept.dept_name} department has been added`);
+        console.log(`success, the ${newDept.dept_name} department has been added`);
 
         dbOptions();       
     } catch (err) {
@@ -124,30 +125,67 @@ const addDept = async() => {
 }
 
 
-// function to add new department to the DB 
+// function to add new role to the DB 
 const addRole = async() => {
     try {
-        // promt user for new role info
-        let newDept = await inquirer.prompt([
-            {
-                message: 'Enter New Role Name :',
-                name: 'dept_name',
-                type: 'input'
-            }
-        ]);
-        // save deparment name in the db
-        connection.query('INSERT INTO department SET ?', {
-            name: newDept.dept_name
-        });
-        console.table(`success, the ${newDept.dept_name} department has been added`);
+        // Get available departments
+        let availableDepts  = connection.query('SELECT * FROM department');
+        // console.log(typeof availableDepts);
+        
+        console.log(typeof availableDepts);
+        // prompt user for role info
+        // let response= await inquirer.prompt([
+        //     {
+        //         message: 'Enter Title for New Role :',
+        //         name: 'title',
+        //         type: 'input'
+        //     },
+        //     {
+        //         message: 'Enter Salary for New Role :',
+        //         name: 'salary',
+        //         type: 'input'
+        //     },
+        //     {        
+        //         message: 'Enter the Department ID for the New Role :',     
+        //         name: 'departmentId',
+        //         type: 'list',
+        //         choices: availableDepts.map((departmentId) => {
+        //             return {
+        //                 name: departmentId.name,
+        //                 value: departmentId.id
+        //             }
+        //         }),
+               
+        //     }
 
-        dbOptions();       
+        // ]);
+
+        // let newRole;
+        // for(i = 0; i < availableDepts.length; i ++) {
+        //     if(availableDepts[i].id === response.choice) {
+        //         newRole = availableDepts[i];
+        //         break;
+        //     };
+        // }
+
+
+        // // update DB to include new role
+        // connection.query("INSERT INTO role SET ?", {
+        //     title: response.title,
+        //     salary: response.salary,
+        //     department_id: response.departmentId
+        // })
+        // // Print success message to the user.
+        // console.log(`success, the ${response.title} role has been added.`);
+        // // Present user input again
+
+        // dbOptions();   
+    
     } catch (err) {
         console.log(err);
+    
     };
 }
-
-
 
 
 dbOptions();
