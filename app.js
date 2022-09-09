@@ -42,6 +42,10 @@ const dbOptions = async() => {
             case 'Add Role':
                 addRole();
                 break;
+            
+            case 'Add Employee':
+                addEmp();
+                break;
         }
     } catch (err) {
         throw err;
@@ -104,7 +108,7 @@ const displayEmp = async() => {
 // function to add new department to the DB 
 const addDept = async() => {
     try {
-        // promt user for new department name
+        // prompt user for new department name
         let newDept = await inquirer.prompt([
             {
                 message: 'Enter New Department Name :',
@@ -174,7 +178,7 @@ const addRole = async() => {
             })
             // Alert user of role addition
             console.log(`success, the ${response.title} role has been added.`);
-            
+
             // Present user input again
             dbOptions();   
         });
@@ -187,6 +191,62 @@ const addRole = async() => {
 }
 
 
+// function to add new employee to the DB 
+const addEmp = async() => {
+    try {
+        // prompt user for new employee details
+        let empRoles = connection.query("SELECT * FROM role");
+        let empManagers = connection.query("SELECT * FROM employee");
+        let response = await inquirer.prompt([
+            {
+                message: 'Enter Employee First Name :',
+                name: 'first_name',
+                type: 'input'
+            },
+            {
+                message: 'Enter Employee Last Name :',
+                name: 'last_name',
+                type: 'input'
+            },
+            {               
+                name: 'role_id',
+                type: 'rawlist',
+                choices: empRoles.map((role) => {
+                    return {
+                        name: role.title,
+                        value: role.id
+                    }
+                }),
+                message: "Enter the ID for the employee's role"
+
+            },
+            {               
+                name: 'manager_id',
+                type: 'rawlist',
+                choices: empManagers.map((manager) => {
+                    return {
+                        name: `${manager.first_name} ${manager.last_name}`,
+                        value: manager.id
+                    }
+                }),
+                message: "Enter the ID for the employee's manager"
+
+            },
+        ]);
+        // save new employee in the db
+        let newEmp = connection.query('INSERT INTO department SET ?', {
+            first_name: response.first_name,
+            last_name: response.last_name,
+            role_id: (response.role_id),
+            manager_id: (response.manager_id)
+        });
+        console.log(`success, employee ${response.first_name} ${response.last_name} has been added`);
+
+        dbOptions();       
+    } catch (err) {
+        console.log(err);
+    };
+}
 
 
 dbOptions();
