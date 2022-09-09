@@ -8,7 +8,7 @@ const connection = require('./db/connection');
 const dbOptions = async() => {
     try {
         let response = await inquirer.prompt({
-            message: 'Where would you like to start? :',
+            message: 'I want to:',
             name: "starting_option",
             type: 'rawlist',
             choices: [
@@ -129,63 +129,67 @@ const addDept = async() => {
 const addRole = async() => {
     try {
         // Get available departments
-        let availableDepts  = connection.query('SELECT * FROM department');
-        // console.log(typeof availableDepts);
+        let availableDepts  = connection.query('SELECT * FROM department', async function (err, res) {
+            
+            // prompt user for the role attributes
+            let response= await inquirer.prompt([
+                {
+                    message: 'Enter Title for New Role :',
+                    name: 'title',
+                    type: 'input'
+                },
+                {
+                    message: 'Enter Salary for New Role :',
+                    name: 'salary',
+                    type: 'input'
+                },
+                {        
+                    message: 'Select the Department to which the new role belong :',     
+                    name: 'departmentId',
+                    type: 'rawlist',
+                    choices: res.map((departmentId) => {
+                        return {
+                            name: departmentId.name,
+                            value: departmentId.id                          
+                        }
+                    })
+                }
 
-        console.log(typeof availableDepts);
-        // prompt user for role info
-        let response= await inquirer.prompt([
-            {
-                message: 'Enter Title for New Role :',
-                name: 'title',
-                type: 'input'
-            },
-            {
-                message: 'Enter Salary for New Role :',
-                name: 'salary',
-                type: 'input'
-            },
-            {        
-                message: 'Enter the Department ID for the New Role :',     
-                name: 'departmentId',
-                type: 'list',
-                choices: availableDepts.map((departmentId) => {
-                    return {
-                        name: departmentId.name,
-                        value: departmentId.id
-                    }
-                }),
-               
+            ]);
+
+            let newRole;
+            for(i = 0; i < availableDepts.length; i ++) {
+                if(availableDepts[i].id === response.choice) {
+                    newRole = availableDepts[i];
+                    break;
+                };
             }
 
-        ]);
 
-        let newRole;
-        for(i = 0; i < availableDepts.length; i ++) {
-            if(availableDepts[i].id === response.choice) {
-                newRole = availableDepts[i];
-                break;
-            };
-        }
-
-
-        // update DB to include new role
-        connection.query("INSERT INTO role SET ?", {
-            title: response.title,
-            salary: response.salary,
-            department_id: response.departmentId
-        })
-        // Print success message to the user.
-        console.log(`success, the ${response.title} role has been added.`);
-        // Present user input again
-
-        dbOptions();   
+            // update DB to include new role
+            connection.query("INSERT INTO role SET ?", {
+                title: response.title,
+                salary: response.salary,
+                department_id: response.departmentId
+            })
+            // Alert user of role addition
+            console.log(`success, the ${response.title} role has been added.`);
+            
+            // Present user input again
+            dbOptions();   
+        });
+    
+    
     
     } catch (err) {
         console.log(err);
-    
     };
 }
 
 
+
+
 dbOptions();
+
+
+

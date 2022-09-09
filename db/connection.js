@@ -12,7 +12,7 @@ connection.connect(err => {
     if(err) {
         throw err;
     }
-    console.log('MySql connected successfully');
+    // console.log('MySql connected successfully');
 })
 
 module.exports = connection;
