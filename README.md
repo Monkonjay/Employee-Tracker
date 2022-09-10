@@ -17,8 +17,7 @@
 ## Overview
 
 ### The challenge
-This application uses a third-party API, OpenWeather One Call to access weather data. I use the fetch method with specific parameters for the API call. The data is used to build a  weather dashboard that runs in the browser and feature dynamically updated HTML and CSS using javaScript and jQuery.
-
+This project deliverable is a command-line CMS that manages a database using Node.js, Inquirer, and MySQL.
 
 
 ### User Story
@@ -60,20 +59,22 @@ THEN I am prompted to select an employee to update and their new role and this i
 
 ### Built with
 
-- Javascript
-- jQuery
-- CSS Bootstrap
-- HTML5
+- node.js
+- inquirer
+- MySql
 
 
 ### What I learned
 
-The main lesson from this app is using api keys to make api calls and dynamically rendering the selected data to the browser. 
+During this project, I practiced connecting node js with a MySQL dataabse and using inquirer to capture the user's input to query and update the database. 
 
 
-```Javascript
-  // API url to get the city coordinates
-  var cityCordinatesUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${targetCity}&limit=1&units=imperial&appid=${APIKey}`;
+```Javascript node.js, mySQL
+  connection.query("INSERT INTO role SET ?", {
+                title: response.title,
+                salary: response.salary,
+                department_id: response.departmentId
+            })
 ```
 
 
