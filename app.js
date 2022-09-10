@@ -238,14 +238,12 @@ const addEmp = async() => {
             ]);
             console.log('first name', response.first_name);
 
-
-
         //save new employee in the db
         connection.query('INSERT INTO employee SET ?', {
             first_name: response.first_name,
             last_name: response.last_name,
-            role_id: (response.role_id),
-            manager_id: (response.manager_id)
+            role_id: response.role_id,
+            manager_id: response.manager_id
         });
         // log success message
         console.log(`success, employee ${response.first_name} ${response.last_name} has been added`);
@@ -260,59 +258,60 @@ const addEmp = async() => {
 }
 
 
-
 // function to update Employee Role
 const updateEmpRole = async() => {
     try {
         // Get current employees
-        let currentEmployees  = connection.query('SELECT * FROM employee', async function (err, res) {
+       connection.query('SELECT * FROM role, employee WHERE employee.role_id = role.id', async function (err, res) {
             
             // prompt user to select employee
             let response= await inquirer.prompt([
-                {        
-                    message: 'Select the emploee whose role you want to update :',     
-                    name: 'departmentId',
+                {      
+                    message: 'Select the employee whose role you want to update :',                
+                    name: 'employee',
                     type: 'rawlist',
-                    choices: res.map((departmentId) => {
+                    choices: res.map((currentEmployee) => {
                         return {
-                            name: departmentId.name,
-                            value: departmentId.id                          
+                            name: `${currentEmployee.first_name} ${currentEmployee.last_name}`,
+                            value: currentEmployee.id                          
                         }
-                    })
+                    }),
+                },
+                {                               
+                    name: 'role',
+                    type: 'rawlist',
+                    choices: res.map((currentRole) => {
+                        return {
+                            name: currentRole.title,
+                            value: currentRole.id                          
+                        }
+                    }),
+                    message: "Select the employee's new role :"
                 }
 
             ]);
 
-            let newRole;
-            for(i = 0; i < currentEmployees.length; i ++) {
-                if(currentEmployees[i].id === response.choice) {
-                    newRole = currentEmployees[i];
-                    break;
-                };
-            }
+            console.log("294 role ID:",response.role);
+            console.log("295 employee ID:",response.employee);
 
 
-            // update DB to include new role
-            connection.query("INSERT INTO role SET ?", {
-                title: response.title,
-                salary: response.salary,
-                department_id: response.departmentId
-            })
-            // Alert user of role addition
-            console.log(`success, the ${response.title} role has been added.`);
+            // update employee role
+            connection.query("UPDATE employee SET ? WHERE", {
+                role_id: response.role,
+                id: response.employee
+            });
+            // Alert user of role update
+            // console.log(`success,  ${response.role} is the employee's new role.`);
 
             // Present user input again
-            dbOptions();   
+            dbOptions();  
+
         });
-    
-    
+   
     
     } catch (err) {
         console.log(err);
     };
 }
-
-
-
 
 dbOptions();
