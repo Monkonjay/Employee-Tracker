@@ -18,7 +18,7 @@ const dbOptions = async() => {
                 'Add Department', 
                 'Add Role', 
                 'Add Employee', 
-                'Update Role'
+                'Update Employee Role'
                 ]
         });
         // trigger user selection 
@@ -45,6 +45,10 @@ const dbOptions = async() => {
             
             case 'Add Employee':
                 addEmp();
+                break;
+
+            case 'Update Employee Role':
+                updateEmpRole();
                 break;
         }
     } catch (err) {
@@ -190,74 +194,11 @@ const addRole = async() => {
     };
 }
 
-
-// // function to add new employee to the DB 
-// const addEmp = async() => {
-//     try {
-//         // prompt user for new employee details
-//         let empRoles = connection.query("SELECT * FROM role");
-//         let empManagers = connection.query("SELECT * FROM employee");
-//         let response = await inquirer.prompt([
-//             {
-//                 message: 'Enter Employee First Name :',
-//                 name: 'first_name',
-//                 type: 'input'
-//             },
-//             {
-//                 message: 'Enter Employee Last Name :',
-//                 name: 'last_name',
-//                 type: 'input'
-//             },
-//             {               
-//                 name: 'role_id',
-//                 type: 'rawlist',
-//                 choices: empRoles.map((role) => {
-//                     return {
-//                         name: role.title,
-//                         value: role.id
-//                     }
-//                 }),
-//                 message: "Enter the ID for the employee's role"
-
-//             },
-//             {               
-//                 name: 'manager_id',
-//                 type: 'rawlist',
-//                 choices: empManagers.map((manager) => {
-//                     return {
-//                         name: `${manager.first_name} ${manager.last_name}`,
-//                         value: manager.id
-//                     }
-//                 }),
-//                 message: "Enter the ID for the employee's manager"
-
-//             },
-//         ]);
-//         // save new employee in the db
-//         let newEmp = connection.query('INSERT INTO department SET ?', {
-//             first_name: response.first_name,
-//             last_name: response.last_name,
-//             role_id: (response.role_id),
-//             manager_id: (response.manager_id)
-//         });
-//         console.log(`success, employee ${response.first_name} ${response.last_name} has been added`);
-
-//         dbOptions();       
-//     } catch (err) {
-//         console.log(err);
-//     };
-// }
-
-
-
-
 // function to add new employee to the DB 
 const addEmp = async() => {
-    try {
-        // prompt user for new employee details
-        // let empRoles = connection.query("SELECT * FROM role");
-        // let empManagers = connection.query("SELECT * FROM employee");
-        let roleandManager = connection.query('SELECT * FROM role, employee WHERE employee.role_id = role.id', async function (err, res) {
+    try {      
+        // query role and employee tables to get manager and role of employee;
+        connection.query('SELECT * FROM role, employee WHERE employee.role_id = role.id', async function (err, res) {
             // prompt for employee's details
             let response = await inquirer.prompt([
                 {
@@ -279,7 +220,7 @@ const addEmp = async() => {
                             value: role.id
                         }
                     }),
-                    message: "Enter the ID for the employee's role"
+                    message: "Select the employee's role"
     
                 },
                 {               
@@ -288,10 +229,10 @@ const addEmp = async() => {
                     choices: res.map((manager) => {
                         return {
                             name: `${manager.first_name} ${manager.last_name}`,
-                            value: manager.manager_id
+                            value: manager.id
                         }
                     }),
-                    message: "Enter the ID for the employee's manager"
+                    message: "Select the employee's manager"
     
                 },
             ]);
@@ -299,25 +240,79 @@ const addEmp = async() => {
 
 
 
-        // // save new employee in the db
-        // let newEmp = connection.query('INSERT INTO employee SET ?', {
-        //     first_name: response.first_name,
-        //     last_name: response.last_name,
-        //     role_id: (response.role_id),
-        //     manager_id: (response.manager_id)
-        // });
-        // console.log(`success, employee ${response.first_name} ${response.last_name} has been added`);
-
-        // dbOptions(); 
-
+        //save new employee in the db
+        connection.query('INSERT INTO employee SET ?', {
+            first_name: response.first_name,
+            last_name: response.last_name,
+            role_id: (response.role_id),
+            manager_id: (response.manager_id)
         });
-       
-    
+        // log success message
+        console.log(`success, employee ${response.first_name} ${response.last_name} has been added`);
+
+        dbOptions(); 
+
+        });   
              
     } catch (err) {
         console.log(err);
     };
 }
+
+
+
+// function to update Employee Role
+const updateEmpRole = async() => {
+    try {
+        // Get current employees
+        let currentEmployees  = connection.query('SELECT * FROM employee', async function (err, res) {
+            
+            // prompt user to select employee
+            let response= await inquirer.prompt([
+                {        
+                    message: 'Select the emploee whose role you want to update :',     
+                    name: 'departmentId',
+                    type: 'rawlist',
+                    choices: res.map((departmentId) => {
+                        return {
+                            name: departmentId.name,
+                            value: departmentId.id                          
+                        }
+                    })
+                }
+
+            ]);
+
+            let newRole;
+            for(i = 0; i < currentEmployees.length; i ++) {
+                if(currentEmployees[i].id === response.choice) {
+                    newRole = currentEmployees[i];
+                    break;
+                };
+            }
+
+
+            // update DB to include new role
+            connection.query("INSERT INTO role SET ?", {
+                title: response.title,
+                salary: response.salary,
+                department_id: response.departmentId
+            })
+            // Alert user of role addition
+            console.log(`success, the ${response.title} role has been added.`);
+
+            // Present user input again
+            dbOptions();   
+        });
+    
+    
+    
+    } catch (err) {
+        console.log(err);
+    };
+}
+
+
 
 
 dbOptions();
