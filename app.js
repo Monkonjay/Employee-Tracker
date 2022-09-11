@@ -173,7 +173,6 @@ const addRole = async() => {
                 };
             }
 
-
             // update DB to include new role
             connection.query("INSERT INTO role SET ?", {
                 title: response.title,
@@ -291,27 +290,21 @@ const updateEmpRole = async() => {
 
             ]);
 
-            console.log("294 role ID:",response.role);
-            console.log("295 employee ID:",response.employee);
-
-
             // update employee role
-            connection.query("UPDATE employee SET ? WHERE", {
-                role_id: response.role,
-                id: response.employee
-            });
+            connection.query(`UPDATE employee SET role_id = ${response.role} WHERE id = ${response.employee}`) 
+          
             // Alert user of role update
-            // console.log(`success,  ${response.role} is the employee's new role.`);
+            console.log(`success,  ${response.role} is the employee's new role.`);
 
-            // Present user input again
+            // Present prompt to user again
             dbOptions();  
 
-        });
-   
+        }); 
     
     } catch (err) {
         console.log(err);
     };
 }
 
+// start application 
 dbOptions();
