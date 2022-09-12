@@ -48,7 +48,8 @@ THEN I am prompted to select an employee to update and their new role and this i
 
 ### Screenshot
 
-![](./assets/images/screenshot.png)
+![](./assets/images/screenshot1.png)
+![](./assets/images/screenshot2.png)
 
 ### Links
 
