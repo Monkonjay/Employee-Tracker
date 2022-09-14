@@ -299,7 +299,8 @@ const updateEmpRole = async() => {
               }); 
 
             })
-              
+           
+   
             // Alert user of role update
             console.log(`success, the employee's  role was updated.`);
 
