@@ -256,7 +256,6 @@ const addEmp = async() => {
     };
 }
 
-// -------------------------------------------------
 // function to update Employee Role
 const updateEmpRole = async() => {
     let empResponse;
@@ -266,7 +265,7 @@ const updateEmpRole = async() => {
        connection.query('SELECT * FROM employee', async function (err, res) {
             
             // prompt user to select employee
-            empResponse= await inquirer.prompt([
+            empResponse = await inquirer.prompt([
                 {      
                     message: 'Select the employee whose role you want to update :',                
                     name: 'employee',
@@ -281,7 +280,7 @@ const updateEmpRole = async() => {
             ]);
 
             connection.query('SELECT * FROM role', async function (err, res) {
-                roleResponse= await inquirer.prompt([
+                roleResponse = await inquirer.prompt([
                 {                               
                     name: 'role',
                     type: 'rawlist',
@@ -293,24 +292,14 @@ const updateEmpRole = async() => {
                     }),
                     message: "Select the employee's new role :"
                 }
-
                 ]);
+
+                connection.query(`UPDATE employee SET role_id = ${roleResponse.role} WHERE id =${empResponse.employee}` , (err, res) => {
+                  console.log(err, res);      
+              }); 
+
             })
-            // console.log("292 Role ID: ", roleResponse.role);
-            // console.log("293 employee ID: ", empResponse.employee);
-
-
-            // // update employee role
-            // connection.query('UPDATE employee SET ?' , {
-            //     role_id: response.role,
-            //     id: response.employee          
-            // }); 
-
-             // update employee role
-             connection.query(`UPDATE employee SET role_id = ${roleResponse.role} WHERE id =${empResponse.employee}` , (err, res) => {
-                console.log(err, res);      
-            }); 
-          
+              
             // Alert user of role update
             console.log(`success, the employee's  role was updated.`);
 
@@ -323,11 +312,6 @@ const updateEmpRole = async() => {
         console.log(err);
     };
 }
-
-// -------------------------------------------
-
-
-
 
 // start application 
 dbOptions();
