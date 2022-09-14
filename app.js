@@ -295,7 +295,7 @@ const updateEmpRole = async() => {
                 ]);
 
                 connection.query(`UPDATE employee SET role_id = ${roleResponse.role} WHERE id =${empResponse.employee}` , (err, res) => {
-                  console.log(err, res);      
+                //   console.log(err, res);      
               }); 
 
             })
