@@ -195,11 +195,24 @@ const addRole = async() => {
 
 // function to add new employee to the DB 
 const addEmp = async() => {
+    let empResponse;
+    let roleResponse;
     try {      
-        // query role and employee tables to get manager and role of employee;
-        connection.query('SELECT * FROM role, employee WHERE employee.role_id = role.id', async function (err, res) {
-            // prompt for employee's details
-            let response = await inquirer.prompt([
+        // query employee table to get manager details;
+        connection.query('SELECT * FROM employee', async function (err, res) {
+            // prompt for manager info
+            empResponse = await inquirer.prompt([    
+                {               
+                    message: "Select the employee's manager",
+                    name: 'manager_id',
+                    type: 'rawlist',
+                    choices: res.map((manager) => {
+                        return {
+                            name: `${manager.first_name} ${manager.last_name}`,
+                            value: manager.id
+                        }
+                    }),               
+                },     
                 {
                     message: 'Enter Employee First Name :',
                     name: 'first_name',
@@ -209,45 +222,37 @@ const addEmp = async() => {
                     message: 'Enter Employee Last Name :',
                     name: 'last_name',
                     type: 'input'
-                },
-                {               
-                    name: 'role_id',
-                    type: 'rawlist',
-                    choices: res.map((role) => {
-                        return {
-                            name: role.title,
-                            value: role.id
-                        }
-                    }),
-                    message: "Select the employee's role"
-    
-                },
-                {               
-                    name: 'manager_id',
-                    type: 'rawlist',
-                    choices: res.map((manager) => {
-                        return {
-                            name: `${manager.first_name} ${manager.last_name}`,
-                            value: manager.id
-                        }
-                    }),
-                    message: "Select the employee's manager"
-    
-                },
+                },                        
             ]);
-            console.log('first name', response.first_name);
 
-        //save new employee in the db
-        connection.query('INSERT INTO employee SET ?', {
-            first_name: response.first_name,
-            last_name: response.last_name,
-            role_id: response.role_id,
-            manager_id: response.manager_id
-        });
-        // log success message
-        console.log(`success, employee ${response.first_name} ${response.last_name} has been added`);
+            connection.query('SELECT * FROM role', async function (err, res) {
+                roleResponse = await inquirer.prompt([
+                    {               
+                        name: 'role_id',
+                        type: 'rawlist',
+                        choices: res.map((role) => {
+                            return {
+                                name: role.title,
+                                value: role.id
+                            }
+                        }),
+                        message: "Select the employee's role"      
+                    }
+                ]);
+                 //save new employee in the db
+                connection.query('INSERT INTO employee SET ?', {
+                    first_name: empResponse.first_name,
+                    last_name: empResponse.last_name,
+                    role_id: roleResponse.role_id,
+                    manager_id: empResponse.manager_id
+                });
+            })            
+            
+            // console.log('first name', empResponse.first_name);  
+            // log success message
+            console.log(`success, employee ${empResponse.first_name} ${empResponse.last_name} has been added`);
 
-        dbOptions(); 
+            dbOptions(); 
 
         });   
              
